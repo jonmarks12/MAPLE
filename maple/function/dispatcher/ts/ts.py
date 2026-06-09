@@ -114,5 +114,18 @@ class TransitionState(JobABC):
                 else:
                     raise ValueError('For AutoNEB method, you should provide a Molecules object or a list of structures.')
 
+            elif self.method == 'fsm':
+                # FSM: Freezing String Method double-ended TS-guess search.
+                if isinstance(self.atoms, (Molecules, list)):
+                    from .algorithm import FSM
+                    fsm = FSM(
+                        output=self.output,
+                        atoms_or_molecules=self.atoms,
+                        paras=self.params
+                    )
+                    fsm.run()
+                else:
+                    raise ValueError('For FSM method, you should provide a Molecules object or a list of structures (reactant and product).')
+
             else:
-                raise ValueError(f'Method {self.method} not recognized. Available methods are: newton, prfo, neb, string, dimer, autoneb.')
+                raise ValueError(f'Method {self.method} not recognized. Available methods are: newton, prfo, neb, string, dimer, autoneb, fsm.')

@@ -21,6 +21,7 @@ full = [
     "matplotlib>=3.3",
     "torch>=2.0",
     "fairchem-core>=1.0",
+    "mlfsm==1.0.1",  # Freezing String Method (#ts(method=fsm)); pulls geomeTRIC + NetworkX
 ]
 
 # Minimal scientific computing

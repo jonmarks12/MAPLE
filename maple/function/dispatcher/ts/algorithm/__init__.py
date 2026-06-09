@@ -4,3 +4,4 @@ from .neb import NEB
 from .string import GSM
 from .dimer import Dimer
 from .autoneb import AutoNEB
+from .fsm import FSM
