@@ -1,0 +1,7 @@
+#model=aimnet2nse
+#ts(method=fsm)
+#device=gpu0
+
+XYZ 0 1 /home/user/software/MAPLE/example/ts/fsm/reactant.xyz
+
+XYZ 0 1 /home/user/software/MAPLE/example/ts/fsm/product.xyz
