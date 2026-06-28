@@ -11,7 +11,7 @@ dynamics, and related post-processing workflows.
 | Category | Methods |
 |----------|---------|
 | **Optimization** | L-BFGS, RFO, SD, CG, SD-CG, GDIIS |
-| **Transition State** | NEB, CI-NEB, P-RFO, Dimer, String/GSM, AutoNEB |
+| **Transition State** | NEB, CI-NEB, P-RFO, Dimer, String/GSM, AutoNEB, FSM |
 | **Reaction Path** | IRC with GS, LQA, HPC, EulerPC |
 | **Dynamics** | NVE, NVT, NPT |
 | **Analysis** | Frequency, PES Scan, Single Point |

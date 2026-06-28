@@ -1,7 +1,7 @@
-#model=aimnet2nse
+#model=uma(size=uma-s-1p2)
 #ts(method=fsm)
 #device=gpu0
 
-XYZ 0 1 /home/user/software/MAPLE/example/ts/fsm/reactant.xyz
+XYZ 0 1 reactant.xyz
 
-XYZ 0 1 /home/user/software/MAPLE/example/ts/fsm/product.xyz
+XYZ 0 1 product.xyz

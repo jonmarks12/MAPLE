@@ -69,20 +69,24 @@ class _ASEUnitsCalculator(Calculator):
     """Present a MAPLE (Hartree, Hartree/A) calculator to ``mlfsm`` as eV / eV/A.
 
     The wrapper delegates every evaluation to the active MAPLE calculator and
-    rescales energy and forces by :data:`HARTREE2EV`. Charge and multiplicity are
-    read by the inner calculator from ``atoms.info`` (propagated by ASE's
-    ``Atoms.copy`` when ``mlfsm`` builds new frontier nodes), so charged and
-    open-shell systems are handled transparently.
+    rescales energy and forces by :data:`HARTREE2EV`. The MAPLE calculators read
+    charge and multiplicity from ``atoms.info``; ``mlfsm`` builds new frontier
+    nodes that may not carry ``info``, so the endpoint's charge/mult is re-stamped
+    on every evaluation to keep charged and open-shell systems correct.
     """
 
     implemented_properties = ["energy", "free_energy", "forces"]
 
-    def __init__(self, inner: Calculator) -> None:
+    def __init__(self, inner: Calculator, info: Optional[dict] = None) -> None:
         super().__init__()
         self._inner = inner
+        self._info = dict(info) if info else {}
 
     def calculate(self, atoms=None, properties=("energy", "forces"), system_changes=all_changes):
         super().calculate(atoms, properties, system_changes)
+        for key in ("charge", "mult"):
+            if key in self._info:
+                atoms.info.setdefault(key, self._info[key])
         energy = float(self._inner.get_potential_energy(atoms)) * HARTREE2EV
         forces = np.asarray(self._inner.get_forces(atoms), dtype=float) * HARTREE2EV
         self.results = {"energy": energy, "free_energy": energy, "forces": forces}
@@ -111,6 +115,10 @@ class FSM(JobABC):
         # (FSM constructs its own path).
         self.reactant: Atoms = images[0]
         self.product: Atoms = images[-1]
+
+        if self.reactant.constraints or self.product.constraints:
+            self.log_info(["[FSM] WARNING: ASE constraints are not honored by mlfsm "
+                           "and will be ignored during the string search.\n"])
 
         self._paras = paras
         self.params = self._init_params(FSMParams, paras, ("fsm", "FSM", "ts"))
@@ -167,7 +175,7 @@ class FSM(JobABC):
         if atoms.calc is None:
             raise ValueError("FSM endpoint has no calculator attached.")
         prepared = atoms.copy()
-        prepared.calc = _ASEUnitsCalculator(atoms.calc)
+        prepared.calc = _ASEUnitsCalculator(atoms.calc, info=atoms.info)
         return prepared
 
     # ------------------------------------------------------------------ #
@@ -181,7 +189,7 @@ class FSM(JobABC):
             except ImportError as exc:
                 message = (
                     "FSM requires the 'mlfsm' package (and its geomeTRIC/NetworkX deps). "
-                    "Install it with 'pip install mlfsm'."
+                    "Install it with \"pip install 'mlfsm==1.0.1'\"."
                 )
                 self.log_error(message)
                 raise ImportError(message) from exc
@@ -197,7 +205,6 @@ class FSM(JobABC):
                 interp_method=p.interp,
                 ninterp=p.ninterp,
                 stepsize=p.stepsize,
-                output=None,
             )
 
             if p.optcoords == "cart":
